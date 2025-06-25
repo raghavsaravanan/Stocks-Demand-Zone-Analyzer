@@ -106,6 +106,10 @@ def calculate_indicators(df):
     Calculate technical indicators for the given dataframe
     """
     try:
+        # Check if we have enough data
+        if len(df) < 30:
+            return None
+            
         # RSI
         rsi_indicator = RSIIndicator(close=df['Close'], window=14)
         rsi = rsi_indicator.rsi()
@@ -122,7 +126,7 @@ def calculate_indicators(df):
         # Monthly change (21-day)
         monthly_change = ((df['Close'] - df['Close'].shift(21)) / df['Close'].shift(21)) * 100
         
-        # Latest values
+        # Latest values with NaN checks
         latest_rsi = rsi.iloc[-1]
         latest_distance = distance_from_low.iloc[-1]
         latest_weekly = weekly_change.iloc[-1]
@@ -130,6 +134,13 @@ def calculate_indicators(df):
         latest_volume = df['Volume'].iloc[-1]
         latest_close = df['Close'].iloc[-1]
         latest_low_30d = low_30d.iloc[-1]
+        
+        # Check for NaN values
+        if (pd.isna(latest_rsi) or pd.isna(latest_distance) or 
+            pd.isna(latest_weekly) or pd.isna(latest_monthly) or
+            pd.isna(latest_volume) or pd.isna(latest_close) or
+            pd.isna(latest_low_30d)):
+            return None
         
         return {
             'rsi': latest_rsi,
@@ -207,6 +218,11 @@ def plot_stock(ticker, data):
     Create an interactive plot for a stock showing price and 30-day low
     """
     try:
+        # Check if data is valid
+        if data is None or data.empty or len(data) < 30:
+            st.error(f"Insufficient data for {ticker}")
+            return None
+            
         # Create subplot with secondary y-axis for volume
         fig = make_subplots(
             rows=2, cols=1,
@@ -365,9 +381,17 @@ def main():
     with col1:
         st.metric("Total Stocks Analyzed", len(df_results))
     with col2:
-        st.metric("In Demand Zone", len(demand_zone_stocks), delta=f"{len(demand_zone_stocks)/len(df_results)*100:.1f}%")
+        if len(df_results) > 0:
+            demand_zone_percentage = (len(demand_zone_stocks) / len(df_results)) * 100
+            st.metric("In Demand Zone", len(demand_zone_stocks), delta=f"{demand_zone_percentage:.1f}%")
+        else:
+            st.metric("In Demand Zone", 0, delta="0%")
     with col3:
-        st.metric("Average RSI", f"{df_results['RSI'].mean():.1f}")
+        if len(df_results) > 0 and not df_results['RSI'].isna().all():
+            avg_rsi = df_results['RSI'].mean()
+            st.metric("Average RSI", f"{avg_rsi:.1f}")
+        else:
+            st.metric("Average RSI", "N/A")
     
     # Display demand zone stocks
     if len(demand_zone_stocks) > 0:
@@ -425,7 +449,7 @@ def main():
     st.markdown(
         """
         <div style='text-align: center; color: #666;'>
-            <p>💡 <strong>Demand Zone Criteria:</strong> RSI ≤ {rsi_threshold} AND Distance from Low ≤ {distance_threshold}% AND Volume ≥ {volume_threshold:,}</p>
+            <p>💡 <strong>Demand Zone Criteria:</strong> RSI ≤ {} AND Distance from Low ≤ {}% AND Volume ≥ {:,}</p>
             <p>📊 Data source: Yahoo Finance | 📅 Last updated: {}</p>
         </div>
         """.format(

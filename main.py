@@ -369,6 +369,20 @@ def main():
     # Create DataFrame
     df_results = pd.DataFrame(results)
     
+    # Check if DataFrame is empty or missing required columns
+    if df_results.empty:
+        st.warning("⚠️ No stock data could be processed. Please try again.")
+        return
+    
+    # Define required columns
+    required_columns = ['Ticker', 'Weekly_%', 'Monthly_%', 'RSI', 'Distance_from_Low_%', 'Volume', 'Close', 'In_Demand_Zone']
+    
+    # Check if all required columns exist
+    missing_columns = [col for col in required_columns if col not in df_results.columns]
+    if missing_columns:
+        st.error(f"❌ Missing required columns: {missing_columns}. Please try refreshing the analysis.")
+        return
+    
     # Separate demand zone and other stocks
     demand_zone_stocks = df_results[df_results['In_Demand_Zone'] == True]
     other_stocks = df_results[df_results['In_Demand_Zone'] == False]
@@ -397,52 +411,92 @@ def main():
     if len(demand_zone_stocks) > 0:
         st.subheader("🎯 Stocks in Demand Zone")
         
-        # Format the demand zone dataframe for display
-        display_df = demand_zone_stocks[['Ticker', 'Weekly_%', 'Monthly_%', 'RSI', 'Distance_from_Low_%', 'Volume', 'Close']].copy()
-        display_df['Volume'] = display_df['Volume'].apply(lambda x: f"{x:,}")
-        display_df['Close'] = display_df['Close'].apply(lambda x: f"${x:.2f}")
-        
-        st.dataframe(
-            display_df,
-            use_container_width=True,
-            hide_index=True
-        )
+        try:
+            # Format the demand zone dataframe for display
+            display_columns = ['Ticker', 'Weekly_%', 'Monthly_%', 'RSI', 'Distance_from_Low_%', 'Volume', 'Close']
+            available_columns = [col for col in display_columns if col in demand_zone_stocks.columns]
+            
+            if available_columns:
+                display_df = demand_zone_stocks[available_columns].copy()
+                
+                # Format columns if they exist
+                if 'Volume' in display_df.columns:
+                    display_df['Volume'] = display_df['Volume'].apply(lambda x: f"{x:,}")
+                if 'Close' in display_df.columns:
+                    display_df['Close'] = display_df['Close'].apply(lambda x: f"${x:.2f}")
+                
+                st.dataframe(
+                    display_df,
+                    use_container_width=True,
+                    hide_index=True
+                )
+            else:
+                st.error("❌ No displayable columns found in results.")
+                
+        except Exception as e:
+            st.error(f"❌ Error displaying demand zone stocks: {str(e)}")
         
         # Plot the top demand zone stock
         if len(demand_zone_stocks) > 0:
-            top_stock = demand_zone_stocks.iloc[0]
-            st.subheader(f"📈 Chart: {top_stock['Ticker']} (Top Demand Zone Stock)")
-            
-            fig = plot_stock(top_stock['Ticker'], top_stock['data'])
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
+            try:
+                top_stock = demand_zone_stocks.iloc[0]
+                st.subheader(f"📈 Chart: {top_stock['Ticker']} (Top Demand Zone Stock)")
                 
-                # Display stock details
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    st.metric("RSI", f"{top_stock['RSI']:.1f}")
-                with col2:
-                    st.metric("Distance from Low", f"{top_stock['Distance_from_Low_%']:.1f}%")
-                with col3:
-                    st.metric("Weekly Change", f"{top_stock['Weekly_%']:.1f}%")
-                with col4:
-                    st.metric("Volume", f"{top_stock['Volume']:,}")
+                if 'data' in top_stock:
+                    fig = plot_stock(top_stock['Ticker'], top_stock['data'])
+                    if fig:
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Display stock details
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            if 'RSI' in top_stock:
+                                st.metric("RSI", f"{top_stock['RSI']:.1f}")
+                        with col2:
+                            if 'Distance_from_Low_%' in top_stock:
+                                st.metric("Distance from Low", f"{top_stock['Distance_from_Low_%']:.1f}%")
+                        with col3:
+                            if 'Weekly_%' in top_stock:
+                                st.metric("Weekly Change", f"{top_stock['Weekly_%']:.1f}%")
+                        with col4:
+                            if 'Volume' in top_stock:
+                                st.metric("Volume", f"{top_stock['Volume']:,}")
+                else:
+                    st.warning("⚠️ No chart data available for this stock.")
+                    
+            except Exception as e:
+                st.error(f"❌ Error displaying stock chart: {str(e)}")
     else:
         st.info("ℹ️ No stocks currently meet the demand zone criteria. Try adjusting the thresholds.")
     
     # Display all results in expandable section
     with st.expander("📋 View All Analyzed Stocks"):
-        # Format the full dataframe for display
-        full_display_df = df_results[['Ticker', 'Weekly_%', 'Monthly_%', 'RSI', 'Distance_from_Low_%', 'Volume', 'Close', 'In_Demand_Zone']].copy()
-        full_display_df['Volume'] = full_display_df['Volume'].apply(lambda x: f"{x:,}")
-        full_display_df['Close'] = full_display_df['Close'].apply(lambda x: f"${x:.2f}")
-        full_display_df['In_Demand_Zone'] = full_display_df['In_Demand_Zone'].map({True: '✅ Yes', False: '❌ No'})
-        
-        st.dataframe(
-            full_display_df,
-            use_container_width=True,
-            hide_index=True
-        )
+        try:
+            # Format the full dataframe for display
+            display_columns = ['Ticker', 'Weekly_%', 'Monthly_%', 'RSI', 'Distance_from_Low_%', 'Volume', 'Close', 'In_Demand_Zone']
+            available_columns = [col for col in display_columns if col in df_results.columns]
+            
+            if available_columns:
+                full_display_df = df_results[available_columns].copy()
+                
+                # Format columns if they exist
+                if 'Volume' in full_display_df.columns:
+                    full_display_df['Volume'] = full_display_df['Volume'].apply(lambda x: f"{x:,}")
+                if 'Close' in full_display_df.columns:
+                    full_display_df['Close'] = full_display_df['Close'].apply(lambda x: f"${x:.2f}")
+                if 'In_Demand_Zone' in full_display_df.columns:
+                    full_display_df['In_Demand_Zone'] = full_display_df['In_Demand_Zone'].map({True: '✅ Yes', False: '❌ No'})
+                
+                st.dataframe(
+                    full_display_df,
+                    use_container_width=True,
+                    hide_index=True
+                )
+            else:
+                st.error("❌ No displayable columns found in results.")
+                
+        except Exception as e:
+            st.error(f"❌ Error displaying all stocks: {str(e)}")
     
     # Footer
     st.markdown("---")

@@ -2,8 +2,6 @@
 
 A fully functional web app that analyzes the entire S&P 500 using technical indicators to identify long-term buying opportunities in demand zones.
 
-![Screenshot](https://your-screenshot-url-if-you-have-one.png)
-
 ## 🔍 Features
 
 - Live S&P 500 ticker retrieval

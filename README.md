@@ -1,8 +1,8 @@
-# 📈 S&P 500 Demand Zone Analyzer
+# S&P 500 Demand Zone Analyzer
 
 A comprehensive Streamlit web application that analyzes S&P 500 stocks for demand zone opportunities based on technical indicators.
 
-## 🚀 Features
+## Features
 
 - **Live Data Fetching**: Automatically fetches current S&P 500 ticker symbols from Wikipedia with fallback
 - **Technical Analysis**: Calculates RSI, 30-day lows, volume analysis, and price momentum
@@ -12,7 +12,7 @@ A comprehensive Streamlit web application that analyzes S&P 500 stocks for deman
 - **Interactive Charts**: Plotly-powered visualizations showing price action and 30-day lows
 - **Responsive Design**: Modern, mobile-friendly interface
 
-## 📊 Technical Indicators
+## Technical Indicators
 
 - **RSI (14-day)**: Relative Strength Index for oversold detection
 - **30-day Low**: Rolling minimum price over 30 trading days
@@ -21,14 +21,14 @@ A comprehensive Streamlit web application that analyzes S&P 500 stocks for deman
 - **Monthly Change**: 21-day price momentum
 - **Volume Analysis**: Latest trading volume
 
-## 🎯 Demand Zone Criteria
+## Demand Zone Criteria
 
 A stock is considered in a demand zone when:
 - RSI ≤ 40 (adjustable)
 - Distance from 30-day low ≤ 5% (adjustable)
 - Volume ≥ 1,000,000 (adjustable)
 
-## 🛠️ Installation
+## Installation
 
 1. **Clone or download the project files**
 
@@ -44,7 +44,7 @@ A stock is considered in a demand zone when:
 
 4. **Open your browser** and navigate to the URL shown in the terminal (typically `http://localhost:8501`)
 
-## 📋 Requirements
+## Requirements
 
 - Python 3.8+
 - Internet connection for live data fetching
@@ -60,7 +60,7 @@ A stock is considered in a demand zone when:
   - html5lib
   - beautifulsoup4
 
-## 🎮 Usage
+## Usage
 
 ### Sidebar Controls
 - **RSI Threshold**: Adjust the RSI level for oversold detection (10-50)
@@ -75,7 +75,7 @@ A stock is considered in a demand zone when:
 3. **Interactive Chart**: Price chart with 30-day low line for top stock
 4. **Complete Results**: Expandable table with all analyzed stocks
 
-## 🔧 Technical Details
+## Technical Details
 
 ### Architecture
 - **Modular Design**: Separated into focused functions for maintainability
@@ -94,11 +94,11 @@ A stock is considered in a demand zone when:
 - Progress indicators for long operations
 - Efficient DataFrame operations
 
-## 🚨 Disclaimer
+## Disclaimer
 
 This application is for educational and research purposes only. It should not be considered as financial advice. Always conduct your own research and consult with financial professionals before making investment decisions.
 
-## 📈 Future Enhancements
+## Future Enhancements
 
 - Additional technical indicators (MACD, Bollinger Bands, etc.)
 - Historical demand zone analysis
@@ -106,11 +106,3 @@ This application is for educational and research purposes only. It should not be
 - Email alerts for new demand zone opportunities
 - Backtesting capabilities
 - Custom watchlist functionality
-
-## 🤝 Contributing
-
-Feel free to submit issues, feature requests, or pull requests to improve the application.
-
-## 📄 License
-
-This project is open source and available under the MIT License. 
